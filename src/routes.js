@@ -70,6 +70,9 @@ const ApplicationsAddChocoApp = React.lazy(() =>
 const ApplicationsAddOfficeApp = React.lazy(() =>
   import('src/views/endpoint/applications/ApplicationsAddOffice'),
 )
+const ApplicationsAddRMMApp = React.lazy(() =>
+  import('src/views/endpoint/applications/ApplicationsAddRMM'),
+)
 const AutopilotAddDevice = React.lazy(() =>
   import('src/views/endpoint/autopilot/AutopilotAddDevice'),
 )
@@ -116,6 +119,9 @@ const ContactsList = React.lazy(() =>
 const EditContact = React.lazy(() => import('src/views/email-exchange/administration/EditContact'))
 const EditMailboxPermissions = React.lazy(() =>
   import('src/views/email-exchange/administration/EditMailboxPermissions'),
+)
+const AddSharedMailbox = React.lazy(() =>
+  import('src/views/email-exchange/administration/AddSharedMailbox'),
 )
 const EditCalendarPermissions = React.lazy(() =>
   import('src/views/email-exchange/administration/EditCalendarPermissions'),
@@ -279,6 +285,11 @@ const routes = [
     name: 'Add Office App',
     component: ApplicationsAddOfficeApp,
   },
+  {
+    path: '/endpoint/applications/add-rmm-app',
+    name: 'Add RMM App',
+    component: ApplicationsAddRMMApp,
+  },
   { path: '/endpoint/autopilot', name: 'Autopilot' },
   { path: '/endpoint/autopilot/add-device', name: 'Add Device', component: AutopilotAddDevice },
   { path: '/endpoint/autopilot/add-profile', name: 'Add Profile', component: AutopilotAddProfile },
@@ -374,6 +385,11 @@ const routes = [
     name: 'Edit Mailbox Permissions',
     path: '/email/administration/edit-mailbox-permissions',
     component: EditMailboxPermissions,
+  },
+  {
+    name: 'Edit Mailbox Permissions',
+    path: '/email/administration/add-shared-mailbox',
+    component: AddSharedMailbox,
   },
   {
     name: 'Edit Calendar Permissions',
