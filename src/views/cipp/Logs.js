@@ -18,7 +18,22 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSearch, faChevronRight, faChevronDown } from '@fortawesome/free-solid-svg-icons'
 import { CippDatatable, cellDateFormatter, CellTip } from 'src/components/tables'
 import { useNavigate } from 'react-router-dom'
-import { useLazyGenericGetRequestQuery } from 'src/store/api/app'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+const reverseSort = (rowA, rowB) => {
+  const a = rowA.DateTime.toLowerCase()
+  const b = rowB.DateTime.toLowerCase()
+
+  if (a > b) {
+    return -1
+  }
+
+  if (b > a) {
+    return 1
+  }
+
+  return 0
+}
 
 const columns = [
   {
@@ -29,6 +44,7 @@ const columns = [
     exportSelector: 'DateTime',
     minWidth: '145px',
     maxWidth: '145px',
+    sortFunction: reverseSort,
   },
   {
     name: 'Tenant',
@@ -40,11 +56,20 @@ const columns = [
     maxWidth: '145px',
   },
   {
-    name: 'API',
-    selector: (row) => row['API'],
+    name: 'Tenant ID',
+    selector: (row) => row['TenantID'],
     sortable: true,
-    cell: (row) => CellTip(row['API']),
-    exportSelector: 'API',
+    cell: (row) => CellTip(row['TenantID'] ?? 'None'),
+    exportSelector: 'TenantID',
+    minWidth: '145px',
+    maxWidth: '145px',
+  },
+  {
+    name: 'User',
+    selector: (row) => row['User'],
+    sortable: true,
+    cell: (row) => CellTip(row['User']),
+    exportSelector: 'User',
     minWidth: '145px',
     maxWidth: '145px',
   },
@@ -56,11 +81,11 @@ const columns = [
     exportSelector: 'Message',
   },
   {
-    name: 'User',
-    selector: (row) => row['User'],
+    name: 'API',
+    selector: (row) => row['API'],
     sortable: true,
-    cell: (row) => CellTip(row['User']),
-    exportSelector: 'User',
+    cell: (row) => CellTip(row['API']),
+    exportSelector: 'API',
     minWidth: '145px',
     maxWidth: '145px',
   },
@@ -82,8 +107,7 @@ const Logs = () => {
   const DateFilter = query.get('DateFilter')
   //const [genericPostRequest, postResults] = useLazyGenericPostRequestQuery()
   const [visibleA, setVisibleA] = useState(false)
-  const [listBackend, listBackendResult] = useLazyGenericGetRequestQuery()
-
+  const [startDate, setStartDate] = useState(DateFilter ? new Date(DateFilter) : new Date())
   const handleSubmit = async (values) => {
     Object.keys(values).filter(function (x) {
       if (values[x] === null) {
@@ -93,6 +117,7 @@ const Logs = () => {
     })
     const shippedValues = {
       SearchNow: true,
+      DateFilter: startDate.toISOString().split('T')[0].replace(/-/g, ''),
       ...values,
     }
     var queryString = Object.keys(shippedValues)
@@ -104,31 +129,38 @@ const Logs = () => {
 
   return (
     <>
-      {listBackendResult.isUninitialized && listBackend({ path: 'api/ListLogs?ListLogs=true' })}
       <CRow>
         <CCol>
           <CCard className="options-card">
             <CCardHeader>
               <CCardTitle className="d-flex justify-content-between">
                 Logbook Settings
-                <CButton size="sm" variant="ghost" onClick={() => setVisibleA(!visibleA)}>
+                <CButton
+                  size="sm"
+                  variant="ghost"
+                  className="stretched-link"
+                  onClick={() => setVisibleA(!visibleA)}
+                >
                   <FontAwesomeIcon icon={visibleA ? faChevronDown : faChevronRight} />
                 </CButton>
               </CCardTitle>
             </CCardHeader>
-            <CCollapse visible={visibleA}>
+          </CCard>
+          <CCollapse visible={visibleA}>
+            <CCard className="options-card">
+              <CCardHeader></CCardHeader>
               <CCardBody>
                 <Form
                   initialValues={{
                     Severity: severity,
                     user: user,
-                    DateFilter: DateFilter,
+                    DateFilter: startDate.toISOString().split('T')[0].replace(/-/g, ''),
                   }}
                   onSubmit={handleSubmit}
                   render={({ handleSubmit, submitting, values }) => {
                     return (
                       <CForm onSubmit={handleSubmit}>
-                        <CRow>
+                        <CRow className="mb-3">
                           <CCol>
                             <RFFCFormInput
                               type="text"
@@ -138,7 +170,7 @@ const Logs = () => {
                             />
                           </CCol>
                         </CRow>
-                        <CRow>
+                        <CRow className="mb-3">
                           <CCol>
                             <RFFCFormInput
                               type="text"
@@ -148,16 +180,15 @@ const Logs = () => {
                             />
                           </CCol>
                         </CRow>
-                        <CRow>
-                          {listBackendResult.isSuccess && (
-                            <CCol>
-                              <RFFCFormSelect
-                                name="DateFilter"
-                                label="Log File"
-                                values={listBackendResult.data}
-                              />
-                            </CCol>
-                          )}
+                        <CRow className="mb-3">
+                          <CCol>
+                            <DatePicker
+                              dateFormat="yyyyMMdd"
+                              className="form-control"
+                              selected={startDate}
+                              onChange={(date) => setStartDate(date)}
+                            />
+                          </CCol>
                         </CRow>
                         <CRow className="mb-3">
                           <CCol>
@@ -172,8 +203,8 @@ const Logs = () => {
                   }}
                 />
               </CCardBody>
-            </CCollapse>
-          </CCard>
+            </CCard>
+          </CCollapse>
         </CCol>
       </CRow>
       <hr />
